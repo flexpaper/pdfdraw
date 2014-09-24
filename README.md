@@ -19,7 +19,6 @@ License
 -------------------
 Apache License Version 2.0
 
-<br/>
 
 <h3>Maintained and sponsored by █▒▓▒░ <a href="http://flexpaper.devaldi.com/">The FlexPaper Project</a></h3>
 
