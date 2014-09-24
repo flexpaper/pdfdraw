@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="js/pdf.js"></script>
+    <script>
+        // gui.App.argv[0] = filename
+        // gui.App.argv[1] = format (jpeg/png)
+        // gui.App.argv[2] = output folder
+		// gui.App.argv[3] = num pages
+		
+        // OSX execution sample: /Applications/node-webkit.app/Contents/MacOS/node-webkit . "docs/Paper.pdf" "jpeg" "export"
+        // Windows execution sample: pdfdraw.exe "docs/Paper.pdf" "jpeg" "export"
+
+        var gui = require('nw.gui');
+        pdfdraw(gui.App.argv[0],gui.App.argv[1],gui.App.argv[2],parseInt(gui.App.argv[3]));
+        var fsOut = require('fs');
+
+		// Get the current window
+		var win = gui.Window.get();
+		win.hide();
+
+        function pdfdraw(pdfFile,format,outputFolder,totalPages){
+            PDFJS.disableWorker = true;
+            PDFJS.workerSrc = 'js/pdf.worker.js';
+            PDFJS.disableRange = true;
+            PDFJS.disableAutoFetch = true;
+            PDFJS.enableStats = false;
+            PDFJS.disableHistory = true;
+            PDFJS.verbosity = 5;
+
+            var parameters = {password: ''};
+            window.pdfFile = parameters.url = pdfFile.toString();
+            parameters.exportResources = false;
+			window.pdfFile = window.pdfFile.replace(/\//g,"\\");
+			window.pdfFileName = window.pdfFile.substring(window.pdfFile.lastIndexOf("\\")+1);
+			window.pagesToConvert = totalPages;
+            window.numResolved = 0;
+
+            PDFJS.getDocument(parameters).then(function(pdf) {
+                window.numPages = pdf.numPages;
+                window.pagePromises = new Array(pdf.numPages);
+
+				if(!window.totalPages)
+					window.totalPages = (window.pagesToConvert>-1 && window.pagesToConvert < pdf.numPages)?window.pagesToConvert:pdf.numPages;
+				
+                for(var p=0;p<window.totalPages+1;p++){
+                    console.log('Rendering page '+p);
+					
+                    var pagePromise = window.pagePromises[p] = pdf.getPage(p).then(function(page) {
+                        var scale = 1275/page.view[2];
+                        var viewport = page.getViewport(scale);
+
+                        //
+                        // Prepare canvas using PDF page dimensions
+                        //
+                        var canvas = document.createElement('canvas');
+                        var context = canvas.getContext('2d');
+						
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+						
+                        var renderContext = {
+                            canvasContext: context,
+                            viewport: viewport,
+                            textLayer: null,
+                            continueCallback: function(cont) {
+                                cont();
+                            }
+                        };
+
+                        //
+                        // render the page & save to disk
+                        //
+                        page.render(renderContext).then(function pdfPageRenderCallback() {
+						
+                            console.log('Writing page '+page.pageNumber+' to disk');
+							
+							var ctx = canvas.getContext('2d');
+							var imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+							ctx.globalCompositeOperation = "destination-over";
+							ctx.fillStyle = "#ffffff";
+							ctx.fillRect(0,0,canvas.width,canvas.height);
+							
+                            fsOut.writeFileSync(outputFolder+window.pdfFileName+"_"+page.pageNumber+"."+(format=="jpeg"?"jpg":format), decodeBase64Image(canvas.toDataURL("image/"+format)).data);
+                            delete canvas;
+
+                            window.numResolved++;
+                            closeWindowCallback();
+
+                        },function pdfPageRenderError(error) {
+
+                        });
+                    });
+                }
+            });
+        }
+
+        function closeWindowCallback(){
+            if(window.numResolved==window.totalPages-1){
+                gui.App.quit();
+            }
+        }
+
+        function decodeBase64Image(dataString) {
+            var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
+                    response = {};
+
+            if (matches.length !== 3) {
+                return new Error('Invalid input string');
+            }
+
+            response.type = matches[1];
+            response.data = new Buffer(matches[2], 'base64');
+
+            return response;
+        }
+    </script>
+</head>
+<body>
+    Converting to PDF to jpeg
+</body>
+</html>
