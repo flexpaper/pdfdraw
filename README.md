@@ -19,7 +19,7 @@ License
 -------------------
 MIT License
 
-<br/><br/>
+<br/>
 
-<b>Maintained and sponsored by █▒▓▒░ <a href="http://flexpaper.devaldi.com/">The FlexPaper Project</a></b>
----------------
+<h3>Maintained and sponsored by █▒▓▒░ <a href="http://flexpaper.devaldi.com/">The FlexPaper Project</a></h3>
+
