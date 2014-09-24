@@ -17,7 +17,7 @@ This is a node.js application which uses node-webkit to draw the pdf to jpeg or 
 
 License
 -------------------
-MIT License
+Apache License Version 2.0
 
 <br/>
 
