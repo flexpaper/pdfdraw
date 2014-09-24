@@ -15,8 +15,8 @@ This is a node.js application which uses node-webkit to draw the pdf to jpeg or 
 2) rename zip file to pdfdraw.nw<br/>
 3) Merge by executing copy /b nw.exe+pdfdraw.nw pdfdraw.exe<br/>
 
-<b>Maintained and sponsored by █▒▓▒░ <a href="http://flexpaper.devaldi.com/">The FlexPaper Project</a></b>
-
 License
 -------------------
 MIT License
+
+<b>Maintained and sponsored by █▒▓▒░ <a href="http://flexpaper.devaldi.com/">The FlexPaper Project</a></b>
